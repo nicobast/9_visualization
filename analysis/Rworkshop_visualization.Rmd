@@ -1,0 +1,361 @@
+---
+title: "R workshop - data visualization"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Participants will be able to visualize their data. This implies basic visualization with fast core functions (plot, hist, boxplot), but also advanced visualization with elaborate formatting by GGPLOT2. Figures will be combined as via GRIDEXTRA and saved to a file. Opionally, we will discuss the animation of figures used for shiny apps or webpages by GGANIMATE. (by Nico Bast)
+
+# helpful resources
+
+example graphs and code: https://www.r-graph-gallery.com/
+
+ggplot reference: https://ggplot2.tidyverse.org/reference/index.html 
+
+# setup
+
+run this before executing the code
+
+## required packages
+
+```{r required_packages}
+
+#check install status of required packages - install if not found
+list.of.packages <- c( 'reshape2','ggplot2','gganimate', 'gridExtra')
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+#load required packages 
+suppressMessages({
+require(reshape2) #data manipulation --> reshape2::melt (melting data to long format)
+require(ggplot2) #advanced visualization
+require(gridExtra) #combine plots 
+require(gganimate) #animater plots
+})
+
+```
+
+## load data
+
+load two objects to current environment:
+
+1. data with i=948 participants (rows) and k=45 variables
+
+2. group as group identifier
+
+```{r load_data}
+
+#read data
+load('data/efa_data.Rdata')
+
+```
+
+
+# basic plots 
+
+These visualization methods are built-in with R base packages. They are very fast even with large data sets and are often applied to visualize data as checks on-the-fly (distribution, outlier, etc.).
+
+## plot
+
+PLOT is a GENERIC function - thus object class defines applied method (see "methods(plot)")
+
+```{r basic_visualization_baseplot}
+
+methods(plot) # shows different subfunctions of plot based on data class
+
+#prepare the data
+sum_score<-rowSums(data_efa,na.rm=T) #create a sum score
+
+# -- PLOT (scatterplot, barplot, boxplot, etc.)####
+plot(sum_score) #SCATTERPLOT: numeric data is plotted across id
+plot(group,sum_score) #plot function interprets group as numeric variable and applies a scatter plot (plot.default)
+plot(as.factor(group),sum_score)  #plot function interprets group as factor and applies boxplots (plot.factor)
+plot(as.factor(group)) # categorical data is plotted as barplot
+```
+
+## histogram
+
+histogram function is very fast, even for large datasets.
+histogram of investigated variables allows a quick check whether data is suitable for analysis
+
+```{r histogram}
+
+hist(sum_score) #basic histogram
+
+hist(sum_score,
+     breaks=30, #number of breaks / number of bars
+     col='pink') #color of bars
+
+plot(density(sum_score,na.rm=T)) #density plot, similar to histogram, only useful in bigger datasets
+
+```
+
+## formatting
+
+graphcial parameters can be adjusted by a call withing the function to change appearance of the plot
+
+```{r format_basic plots}
+
+plot(sum_score,
+     col=group, #color according to group
+     pch=16, #point type
+     asp= 3/1, #ratio of y/x axes
+     main='Sum scores by participant',ylab = 'raw sum score') #labelling
+  
+```
+
+
+## change parameters
+
+graphical parameters (PAR function) can be called to change parameters for the duration of the session.
+This allows to initialize favorite parameters in the setup chunks of the script
+
+### number of plots
+
+```{r change_parameters}
+
+# ?par # options for graphical parameters
+
+par(mfrow=c(1,2)) #MFROW: change the graphical parameter for the number of plots to be drawn (here: one row, two columns)
+  ##--> BE CAREFUL: PERMANENT FOR THE SESSION
+
+plot(sum_score,col=group,cex=0.8,pch=16,ylab = 'raw sum score') #scatterplot on left side (called first)
+plot(as.factor(group),sum_score,col=1:4,xaxt='n',xlab='group') #boxplot on right side with xaxis removed
+
+  #added graphical parameters in new line (will overplot current plot)
+  axis(1, at=1:4, labels=c('ASD','ID','MD','CG')) #add a customized axis
+  mtext("Scatterplot and Boxplot of Sum Score", side=3, outer=TRUE, line=-3) #add a custom label for the grit plot
+  
+par(mfrow=c(1,1)) #reset graphical parameter 
+
+```
+
+### color palette
+
+```{r color_palette}
+
+palette() #displays the palette of default colors (applied to graphical parameter col)
+#colors() #color names that can be applied to palette
+palette(c('springgreen3','tomato','turquoise','peachpuff1')) #change default palette to specific colors
+
+plot(as.factor(group),sum_score,col=1:4,xlab='group') #boxplot with new color palette
+
+palette('default') #reset palette to default
+
+```
+
+## save plot to file
+
+base packages allow to save as JPEG, BMP, and TIFF file format. TIFF Format is usually requested by journals
+
+```{r save_basic_figure}
+
+tiff(file="output/figure1_histogram.tiff", # create a file in tiff format in current working directory
+width=6, height=4, units="in", res=300) #define size and resolution of the resulting figure
+hist(sum_score,breaks=30,col='pink',main='histogram of sumscore') #draw object to file (will not be shown)
+dev.off() #close operation and save file
+
+```
+
+# advanced plots (ggplot2)
+
+GGPLOT = Grammar of graphics plotting. GGPLOT2 is a powerful package by Hadley Wickham with a standardized syntax to allow for elaborate plotting. There are whole books dealing with the syntax of ggplot2: https://ggplot2-book.org/index.html
+
+## basic syntax
+
+the basic components that needed for every ggplot2 are DATA, AESTHETICS, and GEOM
+
+1. DATA - data that is visualized
+
+2. AESTHETICS (aes) - how the visualized data is structured (corrdinate system)
+
+3. GEOM - visualization type
+
+```{r basic_syntax}
+  df.plot<-data.frame(group,sum_score) #DATA - needs to contain all variables to be plotted in one object
+  
+  g<-ggplot(data=df.plot, #DATA
+            aes(x=as.factor(group),y=sum_score)) #AESTHETICS (defines coordinate system)
+  
+  g+geom_boxplot() #GEOM (defines the type of plot) 
+  g+geom_violin() #different GEOM
+  
+```
+
+## prepare the data
+
+data (data_efa) current is in WIDE unstacked format (xlsx, SPSS standard formats) with in different column based on context.
+ggplot requires data to be in LONG format as stacked data with one (single) column for each variable. Other variables may specify the context of an index variable
+
+```{r transform_to_long}
+
+  id<-seq_len(nrow(data_efa)) #add a participant id variable (usually row number in wide data format)
+  data_efa<-data.frame(id,group,data_efa) #concatenate to a data.frame
+  df_long<-melt(data_efa, id.vars = c('id','group'), measure.vars = 3:47) #melt a wide data frame to LONG FORMAT
+  str(df_long) #show structure
+  
+```
+
+## aggregate data
+
+stat_summary are a specific form of geom that transforms/aggregates the data
+
+```{r, fig.width=10,fig.height=6}
+ 
+  ggplot(data=df_long, #DATA
+         aes(x=variable,y=value,group=group,color=as.factor(group)))+ #AES
+    
+    stat_summary(fun.data = 'mean_se') #GEOM
+    
+```
+
+## layers
+
+### load new data
+
+```{r load running_data}
+
+load('data/running_data.Rdata')
+df.running<-df.running[df.running$duration>0,] #correct for artifacts
+
+```
+
+### inspect data
+
+```{r newdata_basic_plots}
+
+  names(df.running)
+    
+  par(mfrow=c(2,2))  
+    
+  with(df.running,hist(distance,breaks=30))
+  with(df.running,hist(elevation_gain))
+  with(df.running,hist(temperature))
+  with(df.running,plot(temperature))
+  
+  par(mfrow=c(1,1))
+  
+```
+
+### linear model
+
+```{r linear_model}
+ with(df.running,summary(lm(distance~hour.class+day.class+year.class+temperature+duration))) #linear model
+```
+
+### multiple layers
+
+Different geoms can be combined in one plot. Question: How did running distance develop over the years?
+
+```{r multiple_layers}
+
+  #DEFINE BASIC PLOT (DATA, AESTHETICS)
+  g<-ggplot(df.running[order(df.running$run.date),],aes(x=run.date,y=distance/1000)) 
+  #ADD ADDITIONAL COMPONENTS:
+  g+geom_point(alpha=0.5)+ #GEOM: point
+    geom_boxplot(aes(group=year.class),color='orange',fill='wheat')+ #GEOM: boxplot 
+    geom_smooth(method='loess',color='navy',fill='blue')+ #GEOM: smoothed line - general additive model
+    labs(x=NULL,y='running distance (km)',title='Running distance over the years')+ #LABELS
+    theme_bw()+ #THEME - add a predefined overall appearance
+    ylim(0,20) #ADDITIONAL GRAPHICAL PARAMETERS - here, limit y-axis to values between 0 and 20
+
+```
+
+## facets
+
+Facets allow to draw multiple plots based on grouping variable. Question: Is running distance affected by weekdays and years?
+
+```{r facets}
+
+  g<-ggplot(df.running,aes(x=as.factor(day.class),y=distance/1000)) 
+  g+geom_violin(fill='lightblue')+ #GEOM
+      labs(x='weekdays',y='running distance (km)',title='Running distance across weeksdays and years')+ #LABELS
+      theme_bw()+ #THEME
+      ylim(0,20)+ #ADDITIONAL PARAMETERS (limit y-axis)
+      scale_x_discrete(labels=c('Mo','Tu','We','Th','Fr','Sa','Su'))+ #ADDITIONAL PARAMETERS (relabel x axis)
+      facet_wrap(~year.class) #FACETS: wrap (one dimensional variable)
+  
+   g<-ggplot(df.running,aes(x=distance/1000)) 
+   g+geom_histogram(bins=20)+
+     xlim(0,20)+
+     facet_grid(day.class~year.class) #FACETS: grid (two dimensional variables)
+  
+
+```
+
+## annotation
+
+plots can be extended by annotations that enrich the plot with additional data that is not part of the drawn dataset
+
+```{r annotation, fig.width=10,fig.height=7}
+
+g<-ggplot(df.running,aes(x=calories))
+
+g+geom_histogram(color='blue',fill='violet')+
+   annotate('rect',xmin=1500,xmax=3100,ymin=-10,ymax=10,alpha=0.4,fill='orange')+
+   annotate('text',x=2200,y=20,label="longer runs",color='orange')+
+   annotate('text',x=1500,y=130,label=paste('Running burns calories! \n median:',median(df.running$calories),'kcal'),
+            cex=6,color='blue')+
+   geom_vline(xintercept = median(df.running$calories),cex=2,col='blue') +
+   geom_hline(yintercept = 100, lty=2) +
+    theme_bw()
+
+```
+
+## save to file
+
+R can save plots in common graphics formats (personally prefer tiff: high quality, reasonable size)
+
+```{r save_to_file}
+
+  #create a TIFF FILE in specified path
+  tiff(filename = "output/figure2_another_histogram.tiff", 
+  width = 6, height = 3, units = "in", pointsize = 12, res=300, compression="lzw") #define dimensions
+
+  #DRAW object to be saved
+  g<-ggplot(df.running,aes(x=distance)) 
+  g+geom_histogram(aes(y=..density..),fill='royalblue4',color='lightblue')+
+    stat_function(fun = dnorm, args = with(df.running, c(mean = mean(distance), sd = sd(distance))))+ #STAT_FUNCTION (applies function to all x values)
+    labs(x='distance (m)',title='Running distance of the last 7 years')+
+    theme_minimal()
+  #figure is SAVED to specified graphics file
+  dev.off()
+  
+```
+
+
+
+# multiple plots (grid.arrange)
+
+It may often be useful to combine plots in one figure: https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html
+
+```{r multiple_plots_arrange, fig.width=10,fig.height=7}
+
+g1<-ggplot(df.running,aes(x=calories))+
+      geom_histogram(color='blue',fill='violet')+
+      annotate('rect',xmin=1500,xmax=3100,ymin=-10,ymax=10,alpha=0.4,fill='orange')+
+      annotate('text',x=2200,y=20,label="longer runs",color='orange')+
+      annotate('text',x=1500,y=130,label=paste('Running burns calories! \n median:',median(df.running$calories),'kcal'),
+            cex=6,color='blue')+
+      geom_vline(xintercept = median(df.running$calories),cex=2,col='blue') +
+      geom_hline(yintercept = 100, lty=2) +
+      theme_bw()
+
+g2<-ggplot(df.running[order(df.running$run.date),],aes(x=run.date,y=distance/1000))+ 
+        geom_point(alpha=0.5)+ #GEOM: point
+        geom_boxplot(aes(group=year.class),color='orange',fill='wheat')+ #GEOM: boxplot 
+        geom_smooth(method='loess',color='navy',fill='blue')+ #GEOM: smoothed line - general additive model
+        labs(x=NULL,y='running distance (km)',title='Running distance over the years')+ #LABELS
+        theme_bw()+ #THEME - add a predefined overall appearance
+        ylim(0,20) #ADDITIONAL GRAPHICAL PARAMETERS - here, limit y-axis to values between 0 and 20
+
+grid.arrange(g1,g2,
+             ncol=2, widths=2:1,
+             top = "Main Title")
+
+
+```
+
