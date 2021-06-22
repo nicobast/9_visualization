@@ -8,6 +8,4 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
-
-Click on this [link](Rworkshop_visualization.html) to see my results.
+Data visualization with R. Includes R base functions and basics in ggplot2: [link](Rworkshop_visualization.html)

@@ -104,9 +104,12 @@ plot(sum_score,
      pch=16, #point type
      asp= 3/1, #ratio of y/x axes
      main='Sum scores by participant',ylab = 'raw sum score') #labelling
-  
-```
 
+#you can also add annotations after graph is plotted:
+#abline(v=400) 
+#abline(h=0)
+
+```
 
 ## change parameters
 
@@ -128,7 +131,7 @@ plot(as.factor(group),sum_score,col=1:4,xaxt='n',xlab='group') #boxplot on right
   #added graphical parameters in new line (will overplot current plot)
   axis(1, at=1:4, labels=c('ASD','ID','MD','CG')) #add a customized axis
   mtext("Scatterplot and Boxplot of Sum Score", side=3, outer=TRUE, line=-3) #add a custom label for the grit plot
-  
+
 par(mfrow=c(1,1)) #reset graphical parameter 
 
 ```
@@ -157,6 +160,9 @@ tiff(file="output/figure1_histogram.tiff", # create a file in tiff format in cur
 width=6, height=4, units="in", res=300) #define size and resolution of the resulting figure
 hist(sum_score,breaks=30,col='pink',main='histogram of sumscore') #draw object to file (will not be shown)
 dev.off() #close operation and save file
+
+# additional argument - reduces size of Tiff files by compression
+# compression = 'lzw' 
 
 ```
 
@@ -234,6 +240,7 @@ df.running<-df.running[df.running$duration>0,] #correct for artifacts
   with(df.running,hist(distance,breaks=30))
   with(df.running,hist(elevation_gain))
   with(df.running,hist(temperature))
+  
   with(df.running,plot(temperature))
   
   par(mfrow=c(1,1))
@@ -283,7 +290,6 @@ Facets allow to draw multiple plots based on grouping variable. Question: Is run
      xlim(0,20)+
      facet_grid(day.class~year.class) #FACETS: grid (two dimensional variables)
   
-
 ```
 
 ## annotation
@@ -325,7 +331,6 @@ R can save plots in common graphics formats (personally prefer tiff: high qualit
   dev.off()
   
 ```
-
 
 
 # multiple plots (grid.arrange)
