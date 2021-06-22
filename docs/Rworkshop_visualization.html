@@ -500,16 +500,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomnicobast9visualizationtreeb54c0e28dc28ff87a2a2d74347f73a0da4150e3dtargetblankb54c0e2a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/nicobast/9_visualization/tree/b54c0e28dc28ff87a2a2d74347f73a0da4150e3d" target="_blank">b54c0e2</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomnicobast9visualizationtreeedd445cb1ea785c9558145717dc49f321750f3bdtargetblankedd445ca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/nicobast/9_visualization/tree/edd445cb1ea785c9558145717dc49f321750f3bd" target="_blank">edd445c</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomnicobast9visualizationtreeb54c0e28dc28ff87a2a2d74347f73a0da4150e3dtargetblankb54c0e2a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomnicobast9visualizationtreeedd445cb1ea785c9558145717dc49f321750f3bdtargetblankedd445ca" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/nicobast/9_visualization/tree/b54c0e28dc28ff87a2a2d74347f73a0da4150e3d" target="_blank">b54c0e2</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/nicobast/9_visualization/tree/edd445cb1ea785c9558145717dc49f321750f3bd" target="_blank">edd445c</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -566,6 +566,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/nicobast/9_visualization/blob/edd445cb1ea785c9558145717dc49f321750f3bd/analysis/Rworkshop_visualization.Rmd" target="_blank">edd445c</a>
+</td>
+<td>
+nicobast
+</td>
+<td>
+2021-06-22
+</td>
+<td>
+Add my first analysis
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/nicobast/9_visualization/3fba4d6565e724e8e1920f1f757cf3bd0d6c093e/docs/Rworkshop_visualization.html" target="_blank">3fba4d6</a>
+</td>
+<td>
+nicobast
+</td>
+<td>
+2021-06-22
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -714,6 +748,9 @@ plot(sum_score) #SCATTERPLOT: numeric data is plotted across id</code></pre>
      asp= 3/1, #ratio of y/x axes
      main=&#39;Sum scores by participant&#39;,ylab = &#39;raw sum score&#39;) #labelling</code></pre>
 <p><img src="figure/Rworkshop_visualization.Rmd/format_basic%20plots-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#you can also add annotations after graph is plotted:
+#abline(v=400) 
+#abline(h=0)</code></pre>
 </div>
 <div id="change-parameters" class="section level2">
 <h2>change parameters</h2>
@@ -756,6 +793,8 @@ hist(sum_score,breaks=30,col=&#39;pink&#39;,main=&#39;histogram of sumscore&#39;
 dev.off() #close operation and save file</code></pre>
 <pre><code>png 
   2 </code></pre>
+<pre class="r"><code># additional argument - reduces size of Tiff files by compression
+# compression = &#39;lzw&#39; </code></pre>
 </div>
 </div>
 <div id="advanced-plots-ggplot2" class="section level1">
@@ -823,6 +862,7 @@ df.running&lt;-df.running[df.running$duration&gt;0,] #correct for artifacts</cod
   with(df.running,hist(distance,breaks=30))
   with(df.running,hist(elevation_gain))
   with(df.running,hist(temperature))
+  
   with(df.running,plot(temperature))</code></pre>
 <p><img src="figure/Rworkshop_visualization.Rmd/newdata_basic_plots-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>  par(mfrow=c(1,1))</code></pre>
